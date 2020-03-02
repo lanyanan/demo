@@ -25,11 +25,104 @@
       font-size: 22px;
       line-height: 20px;
     }
+
+    @keyframes myfirst
+    {
+      0%   {opacity: 1;top:0px}
+      100% {opacity: 0.1;top:-30px}
+    }
+    
+    @-webkit-keyframes myfirst /* Safari 与 Chrome */
+    {
+      0%   {opacity: 1;top:0px}
+      100% {opacity: 0.1;top:-30px}
+    }
+    .over-mark {
+      width: 120px;
+      height: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+    .mark-animation {
+      position: absolute;
+      left:20px;
+      top: 0px;
+      animation: myfirst 1s linear infinite;
+    /* Safari 与 Chrome: */
+    -webkit-animation: myfirst 1s linear infinite;
+    }
+    .mark-animation img{
+      width: 60px;
+    }
+    .mark-text {
+      display: block;
+      padding:10px;
+      background:rgba(0,0,0,0.5);
+      border-radius: 5px;
+    }
+    .swiper-container {
+      position: fixed;
+      bottom: 80px;
+      width: 100%;
+      height:160px;
+      background: rgba(0,0,0,0.3);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+    }
+    .swiper-container-item {
+      width: 200px;
+      height: 140px;
+      position: relative;
+      margin:0 10px;
+    }
+    .swiper-container-item img{
+      width: 200px;
+      height: 140px;
+      opacity: 0.7;
+    }
+    .swiper-container-item div{
+      display: block;
+      width: 200px;
+      position: absolute;
+      left: 0;
+      bottom: 10px;
+      text-align: center;
+      padding: 5px;
+      color: #fff;
+    }
+    .swiper-container-item div span{
+      padding:3px 5px;
+      color: #fff;
+      border-radius: 2px;
+      background: rgba(0,0,0,0.5);
+    }
+    .swiper-container-item-selected{
+      border:4px solid #fff;
+    }
+    .swiper-container-item-selected img{
+      opacity: 1;
+    }
   </style>
 </head>
 <body>
 
 <div id="photosphere"></div>
+<section class="swiper-container">
+  <section data-selected="true" class="swiper-container-item swiper-container-item-selected">
+    <img src="../img/img/left.png"/>
+    <div>
+      <span>客厅</span>
+    </div>
+  </section>
+  <section data-selected="false" class="swiper-container-item">
+    <img src="../img/img/right.png"/>
+    <div>
+      <span>浴室</span>
+    </div>
+  </section>
+</section>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.97.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/promise-polyfill@8.1.3/dist/polyfill.min.js"></script>
@@ -39,6 +132,7 @@
 <script src="https://cdn.jsdelivr.net/npm/three@0.97.0/examples/js/controls/DeviceOrientationControls.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.97.0/examples/js/effects/StereoEffect.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/photo-sphere-viewer@3.5.1/dist/photo-sphere-viewer.min.js"></script>
+<script src="https://cdn.bootcss.com/zepto/1.2.0/zepto.min.js"></script>
 
 <script>
   var div = document.getElementById('photosphere');
@@ -102,7 +196,7 @@
           id: 'text',
           longitude: -1,
           latitude: -0.2,
-          html: '去浴室看看<img width=32 height=32 src="./img/pin-blue.png"/>',
+          html: '<span class="mark-text">浴室</span><div class="over-mark"><div class="mark-animation"><img src="../img/inewhome/default.png"></div></div>',
           anchor: 'bottom right',
           scale: [0.5, 1.5],
           style: {
@@ -126,6 +220,7 @@
         }
       ]
             });
+           console.log() ;
 
 				PSV.on('select-marker', function(marker) {
 						if (marker.data && marker.data.mark===1) {
@@ -133,7 +228,11 @@
 								PSV.clearMarkers();
 								if (loading) {
 									return;
-								}
+                }
+                PSV.rotate({
+            longitude:-0.1,
+            latitude:0.3
+           },false)
 								loading = true;
 								PSV.setPanorama('./img/0011.jpg', {zoom: 50}, true)
 								.then(function() {
@@ -145,7 +244,7 @@
                       id: 'text',
                       longitude: 0.3,
                       latitude: -0.1,
-                      html: '去客厅看看<img width=32 height=32 src="./img/pin-blue.png"/>',
+                      html: '<span class="mark-text">客厅</span><div class="over-mark"><div class="mark-animation"><img src="../img/inewhome/default.png"></div></div>',
                       anchor: 'bottom right',
                       scale: [0.5, 1.5],
                       style: {
@@ -172,15 +271,14 @@
 								loading = true;
 								PSV.setPanorama('./img/00125.jpg', {zoom: 50}, true)
 								.then(function() {
-                  PSV.setCaption('浴室');
-                  console.log(PSV)
+                  PSV.setCaption('客厅');
                   PSV.addMarker(
                     {
                       // html marker with custom style
                       id: 'text',
                       longitude: -1,
                       latitude: -0.1,
-                      html: '去浴室看看<img width=32 height=32 src="./img/pin-blue.png"/>',
+                      html: '<span class="mark-text">浴室</span><div class="over-mark"><div class="mark-animation"><img src="../img/inewhome/default.png"></div></div>',
                       anchor: 'bottom right',
                       scale: [0.5, 1.5],
                       style: {
@@ -198,8 +296,21 @@
 									loading = false;
 								});
 						}
-					});
+          });
+          $(".swiper-container-item").on("click",function(e){
+            e.preventDefault();
+            e.stopPropagation();
+            var isSelected = $(this).attr("data-selected");
+            console.log(isSelected,$(this))
+            $(".swiper-container-item").attr('data-selected',false);
+            $(".swiper-container-item").attr('class','swiper-container-item');
+            $(this).attr('data-selected',!isSelected);
+            if(!isSelected){
+              $(this).attr('class','swiper-container-item swiper-container-item-selected');
+            }else{
+              $(this).attr('class','swiper-container-item');
+            }
+          })
 		</script>
 	</body>
-
 </html>
