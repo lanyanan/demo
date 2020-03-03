@@ -111,13 +111,13 @@
 <div id="photosphere"></div>
 <section class="swiper-container">
   <section data-selected="true" class="swiper-container-item swiper-container-item-selected">
-    <img src="../img/img/left.png"/>
+    <img src="./img/left.jpg"/>
     <div>
       <span>客厅</span>
     </div>
   </section>
   <section data-selected="false" class="swiper-container-item">
-    <img src="../img/img/right.png"/>
+    <img src="./img/right.jpg"/>
     <div>
       <span>浴室</span>
     </div>
@@ -139,7 +139,7 @@
 			var PSV = new PhotoSphereViewer({
 					panorama: './img/00125.jpg',
 					container: div,
-					time_anim: 3000,
+					time_anim: false,
 					navbar: true,
 					default_long: Math.PI / 2,
 					defaultZoomLvl:0,
@@ -244,7 +244,7 @@
                       id: 'text',
                       longitude: 0.3,
                       latitude: -0.1,
-                      html: '<span class="mark-text">客厅</span><div class="over-mark"><div class="mark-animation"><img src="../img/inewhome/default.png"></div></div>',
+                      html: '<span class="mark-text">客厅</span><div class="over-mark"><div class="mark-animation"><img src="./img/inewhome/default.png"></div></div>',
                       anchor: 'bottom right',
                       scale: [0.5, 1.5],
                       style: {
@@ -278,7 +278,7 @@
                       id: 'text',
                       longitude: -1,
                       latitude: -0.1,
-                      html: '<span class="mark-text">浴室</span><div class="over-mark"><div class="mark-animation"><img src="../img/inewhome/default.png"></div></div>',
+                      html: '<span class="mark-text">浴室</span><div class="over-mark"><div class="mark-animation"><img src="./img/inewhome/default.png"></div></div>',
                       anchor: 'bottom right',
                       scale: [0.5, 1.5],
                       style: {
@@ -311,6 +311,51 @@
               $(this).attr('class','swiper-container-item');
             }
           })
+          function WebSocketTest()
+         {
+            if ("WebSocket" in window)
+            {
+               alert("您的浏览器支持 WebSocket!");
+               var isSend = localStorage.getItem('send')
+               // 打开一个 web socket
+               var ws = new WebSocket("ws://112.74.210.253:37300");
+               
+               ws.onopen = function()
+               {
+                  // Web Socket 已连接上，使用 send() 方法发送数据
+                  if(isSend){
+                    PSV.on('position-updated', function(position) {
+                    ws.send(JSON.stringify(position));
+                  })
+                  }
+               };
+
+               ws.onmessage = function (evt) 
+               { 
+                  var received_msg = evt.data;
+                  //alert(isSend,JSON.parse(received_msg))
+                  if(!isSend){
+                    PSV.rotate(JSON.parse(received_msg))
+                  }
+                  console.log(JSON.parse(received_msg))
+               };
+                
+               ws.onclose = function()
+               { 
+                  // 关闭 websocket
+                  alert("连接已关闭..."); 
+               };
+            }
+            
+            else
+            {
+               // 浏览器不支持 WebSocket
+               alert("您的浏览器不支持 WebSocket!");
+            }
+         }
+         WebSocketTest();
+
+
 		</script>
 	</body>
 </html>
