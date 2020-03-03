@@ -70,8 +70,10 @@
       justify-content: center;
       align-items: center;
       z-index: 10000;
+      display: none;
     }
     .swiper-container-item {
+      border:4px solid rgba(0,0,0,0);
       width: 200px;
       height: 140px;
       position: relative;
@@ -110,13 +112,13 @@
 
 <div id="photosphere"></div>
 <section class="swiper-container">
-  <section data-selected="true" class="swiper-container-item swiper-container-item-selected">
+  <section data-id="1" data-selected="true" class="swiper-container-item swiper-container-item-selected">
     <img src="./img/left.jpg"/>
     <div>
       <span>客厅</span>
     </div>
   </section>
-  <section data-selected="false" class="swiper-container-item">
+  <section data-id="2" data-selected="false" class="swiper-container-item">
     <img src="./img/right.jpg"/>
     <div>
       <span>浴室</span>
@@ -150,32 +152,7 @@
 						backgroundColor: 'rgba(58, 67, 77, 0.7)'
 					},
 					navbar: [
-          'autorotate', 'zoom', 'download', 'markers',
-          {
-            title: 'Change image',
-            className: 'custom-button',
-            content: '🔄',
-            onClick: (function() {
-              var i = 0;
-              var loading = false;
-
-              return function() {
-                if (loading) {
-                  return;
-                }
-
-                i = 1 - i;
-                loading = true;
-                PSV.clearMarkers();
-
-                PSV.setPanorama('./img/0011.jpg', {zoom: 50}, true)
-                  .then(function() {
-                    PSV.setCaption('浴室');
-                    loading = false;
-                  });
-              }
-            }())
-          },
+          'autorotate',
           {
             title  : 'Random position',
             className: 'custom-button',
@@ -224,15 +201,18 @@
 
 				PSV.on('select-marker', function(marker) {
 						if (marker.data && marker.data.mark===1) {
-								var loading = false;
+              addBathroom();
+            }
+            if (marker.data && marker.data.mark===0) {
+              addLivingRoom();
+						}
+          });
+          function addBathroom(){
+            var loading = false;
 								PSV.clearMarkers();
 								if (loading) {
 									return;
                 }
-                PSV.rotate({
-            longitude:-0.1,
-            latitude:0.3
-           },false)
 								loading = true;
 								PSV.setPanorama('./img/0011.jpg', {zoom: 50}, true)
 								.then(function() {
@@ -261,9 +241,9 @@
                   );
 									loading = false;
 								});
-            }
-            if (marker.data && marker.data.mark===0) {
-								var loading = false;
+          }
+          function addLivingRoom(){
+            var loading = false;
 								PSV.clearMarkers();
 								if (loading) {
 									return;
@@ -295,27 +275,31 @@
                   );
 									loading = false;
 								});
-						}
-          });
+          }
           $(".swiper-container-item").on("click",function(e){
             e.preventDefault();
             e.stopPropagation();
-            var isSelected = $(this).attr("data-selected");
-            console.log(isSelected,$(this))
-            $(".swiper-container-item").attr('data-selected',false);
-            $(".swiper-container-item").attr('class','swiper-container-item');
-            $(this).attr('data-selected',!isSelected);
+            var isSelected = $(this).hasClass("data-selected");
+            // $(".swiper-container-item").attr('data-selected',false);
+            // $(".swiper-container-item").attr('class','swiper-container-item');
+            
             if(!isSelected){
-              $(this).attr('class','swiper-container-item swiper-container-item-selected');
-            }else{
-              $(this).attr('class','swiper-container-item');
+              if($(this).attr('data-id')==="1"){
+                addLivingRoom();
+              }else{
+                addBathroom();
+              };
+              $(this).attr('data-selected',true);
+
+              $(".swiper-container-item").removeClass('swiper-container-item-selected');
+              $(this).addClass("swiper-container-item-selected")
             }
           })
           function WebSocketTest()
          {
             if ("WebSocket" in window)
             {
-               alert("您的浏览器支持 WebSocket!");
+               console.log("您的浏览器支持 WebSocket!");
                var isSend = localStorage.getItem('send')
                // 打开一个 web socket
                var ws = new WebSocket("ws://112.74.210.253:37300");
@@ -325,7 +309,7 @@
                   // Web Socket 已连接上，使用 send() 方法发送数据
                   if(isSend){
                     PSV.on('position-updated', function(position) {
-                    ws.send(JSON.stringify(position));
+                    // ws.send(JSON.stringify(position));
                   })
                   }
                };
@@ -345,17 +329,31 @@
                   // 关闭 websocket
                   alert("连接已关闭..."); 
                };
-            }
-            
-            else
-            {
+            } else {
                // 浏览器不支持 WebSocket
                alert("您的浏览器不支持 WebSocket!");
             }
+          }
+          WebSocketTest();
+          function IsPC() {
+            var userAgentInfo = navigator.userAgent;
+            var Agents = ["Android", "iPhone",
+                  "SymbianOS", "Windows Phone",
+                  "iPad", "iPod"];
+            var flag = true;
+            for (var v = 0; v < Agents.length; v++) {
+              if (userAgentInfo.indexOf(Agents[v]) > 0) {
+                flag = false;
+                break;
+              }
+            }
+            return flag;
+          }
+         if(!IsPC()){
+          $('.swiper-container').css({
+            'display':'none'
+          })
          }
-         WebSocketTest();
-
-
 		</script>
 	</body>
 </html>
